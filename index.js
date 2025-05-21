@@ -5,6 +5,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.use("/users",require("./src/routes/user.route"));
 
 app.listen(3000, (req, res) => {
   console.log("running at 3000");
