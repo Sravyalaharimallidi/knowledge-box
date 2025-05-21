@@ -9,7 +9,7 @@ const createUser=async(req,res)=>{
           });
        }
        try {
-        const {email,password,full_name}=req.body;
+        const {email,password,full_name}=result.data;
         const { data:authData,error:authError} = await supabase.auth.signUp({
           email,
           password,
@@ -41,8 +41,41 @@ return res.status(500).json({
 }
 
 const updateUser=async(req,res)=>{
-  
+  const result=UserSchema.safeParse(req.body);
+       if(!result.success){
+        return res.status(400).json({
+            error: "invalid input",
+            message: result.error.message
+          });
+       }
+       try{
+        const {email,password,full_name}=result.data;
+        const {data:authData,error:authError}=await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+        if(authError) throw authError;
+
+        const {error:dbError}=await supabase.auth.updateUser({
+          email:email,
+          data: {full_name:full_name}
+        });
+        if(dbError) throw dbError;
+        const { error:error } = await supabase
+  .from('users')
+  .update({ full_name: full_name })
+  .eq('id', authData.user.id);
+  if(error) throw error;
+        res.status(200).json({
+          message:"user data updated"
+        });
+       }catch(err){
+        res.status(500).json({
+          error:"database error",
+          message:err.message
+        });
+       }
 }
 
 
-module.exports={createUser};
+module.exports={createUser,updateUser};

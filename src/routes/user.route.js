@@ -1,7 +1,8 @@
 const express=require("express");
-const {createUser}=require("../contoller/user.controller");
+const {createUser,updateUser}=require("../contoller/user.controller");
 const router=express.Router();
 
-router.post('/',createUser);
+router.route('/').post(createUser)
+.put(updateUser);
 
 module.exports=router;
