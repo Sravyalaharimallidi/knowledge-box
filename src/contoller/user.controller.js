@@ -1,5 +1,5 @@
 const {supabase}=require("../db/db");
-const UserSchema=require("../zod/project.validation");
+const {UserSchema}=require("../zod/project.validation");
 const createUser=async(req,res)=>{
   const result=UserSchema.safeParse(req.body);
   if(!result.success){

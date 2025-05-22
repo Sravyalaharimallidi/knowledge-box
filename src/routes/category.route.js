@@ -1,6 +1,8 @@
 const express=require("express");
 const router=express.Router();
-const {createCategory,getCategories}=require("../contoller/category.controller");
+const {createCategory,getCategories, updateCategory,deleteCategory}=require("../contoller/category.controller");
 router.route('/').post(createCategory)
-.get(getCategories);
+.put(updateCategory)
+.get(getCategories)
+.delete(deleteCategory);
 module.exports=router;
