@@ -1,4 +1,6 @@
 const express=require("express");
 const router=express.Router();
-
-router.route('/').post(createCategory);
+const {createCategory,getCategories}=require("../contoller/category.controller");
+router.route('/').post(createCategory)
+.get(getCategories);
+module.exports=router;
