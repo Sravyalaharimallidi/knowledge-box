@@ -1,7 +1,7 @@
 const {supabase}=require("../db/db");
-const {UserSchema,CategorySchema}=require("../zod/project.validation");
+const {CategorySchema}=require("../zod/project.validation");
 const createCategory=async(req,res)=>{
-    result=CategorySchema.safeParse(req.body);
+   const result=CategorySchema.safeParse(req.body);
     if(!result.success){
         return res.status(400).json({
             error:"invalid input",
@@ -9,19 +9,22 @@ const createCategory=async(req,res)=>{
         });
     }
     try{
-const {id,name}=result.data;
+const {user_id,name}=result.data;
 const {data:dbData,error:dbError}=await supabase
                            .from('categories')
                            .insert([{
-                            user_id:id,
+                            user_id:user_id,
                             name:name,
                             created_at:new Date().toISOString()
-                           }]);
+                           }])
+                           .select('id')
+                           .single();
 if(dbError) throw dbError;
 
 res.status(201).json({
-    message:"category created"
-})
+    message:"category created",
+    categoryId:dbData?.id
+});
     }catch(err){
         res.status(500).json({
             error:"database error",
@@ -31,7 +34,7 @@ res.status(201).json({
 }
 const getCategories=async(req,res)=>{
     try{
-        const {id}=req.body;
+        const {id}=req.params;
         const {data:authData,error:authError}=await supabase
                                                   .from('categories')
                                                   .select('id,name,user_id')
@@ -55,16 +58,15 @@ const updateCategory=async(req,res)=>{
     }
     try{
         const{id,name}=result.data;
-        const{data:authData,error:authError}=await supabase
-                                                   .from('categories')
-                                                   .update({name:name})
-                                                   .eq('id',id);
-    if(authError) throw authError;
-    res.status(200).json({
+        const { error: updateError } = await supabase
+                                  .from('categories')
+                                  .update({ name })
+                                  .eq('id', id);
+     if (updateError) throw updateError;
+      res.status(200).json({
         message:"category updated"
     });
-
-    }catch(err){
+}catch(err){
         res.status(500).json({
             error:"database error",
             message:err.message
@@ -73,7 +75,7 @@ const updateCategory=async(req,res)=>{
 }
 const deleteCategory=async(req,res)=>{
     try{
-    const {id}=req.body;
+    const {id}=req.params;
     const response = await supabase
   .from('categories')
   .delete()
